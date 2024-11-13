@@ -1,0 +1,389 @@
+Emmanuel ASIMWE---223020753
+Gad  MUGISHA----223008547
+
+
+QN1.
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Loan {
+    // Instance variables
+    private double monthlyPayment;
+    private int numberOfYears;
+    private double loanAmount;
+
+    // Constructor with three variables using "this" keyword
+    public Loan(double monthlyPayment, int numberOfYears, double loanAmount) {
+        this.monthlyPayment = monthlyPayment;
+        this.numberOfYears = numberOfYears;
+        this.loanAmount = loanAmount;
+    }
+
+    // Getter and Setter methods
+    public double getMonthlyPayment() {
+        return monthlyPayment;
+    }
+
+    public void setMonthlyPayment(double monthlyPayment) {
+        this.monthlyPayment = monthlyPayment;
+    }
+
+    public int getNumberOfYears() {
+        return numberOfYears;
+    }
+
+    public void setNumberOfYears(int numberOfYears) {
+        this.numberOfYears = numberOfYears;
+    }
+
+    public double getLoanAmount() {
+        return loanAmount;
+    }
+
+    public void setLoanAmount(double loanAmount) {
+        this.loanAmount = loanAmount;
+    }
+
+    // Method to calculate monthly payment
+    public void calculateMonthlyPayment(double annualInterestRate) {
+        double monthlyInterestRate = annualInterestRate / 12 / 100;
+        int totalMonths = this.numberOfYears * 12;
+        this.monthlyPayment = (this.loanAmount * monthlyInterestRate) /
+                (1 - Math.pow(1 + monthlyInterestRate, -totalMonths));
+    }
+
+    // Main method to display the UI
+    public static void main(String[] args) {
+        // Create a JFrame for the UI
+        JFrame frame = new JFrame("Loan Payment Calculator");
+        frame.setSize(400, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
+
+        // Labels and text fields for loan input
+        JLabel amountLabel = new JLabel("Loan Amount:");
+        amountLabel.setBounds(20, 20, 100, 25);
+        frame.add(amountLabel);
+
+        JTextField amountField = new JTextField();
+        amountField.setBounds(130, 20, 200, 25);
+        frame.add(amountField);
+
+        JLabel yearsLabel = new JLabel("Years:");
+        yearsLabel.setBounds(20, 60, 100, 25);
+        frame.add(yearsLabel);
+
+        JTextField yearsField = new JTextField();
+        yearsField.setBounds(130, 60, 200, 25);
+        frame.add(yearsField);
+
+        JLabel interestLabel = new JLabel("Interest Rate:");
+        interestLabel.setBounds(20, 100, 100, 25);
+        frame.add(interestLabel);
+
+        JTextField interestField = new JTextField();
+        interestField.setBounds(130, 100, 200, 25);
+        frame.add(interestField);
+
+        JButton calculateButton = new JButton("Calculate");
+        calculateButton.setBounds(130, 140, 100, 30);
+        frame.add(calculateButton);
+
+        JLabel resultLabel = new JLabel("Monthly Payment:");
+        resultLabel.setBounds(20, 180, 200, 25);
+        frame.add(resultLabel);
+
+        // Action listener for calculate button
+        calculateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get user inputs
+                double loanAmount = Double.parseDouble(amountField.getText());
+                int numberOfYears = Integer.parseInt(yearsField.getText());
+                double annualInterestRate = Double.parseDouble(interestField.getText());
+
+                // Create a Loan object and calculate monthly payment
+                Loan loan = new Loan(0, numberOfYears, loanAmount);
+                loan.calculateMonthlyPayment(annualInterestRate);
+
+                // Display result
+                resultLabel.setText("Monthly Payment: " + String.format("%.2f", loan.getMonthlyPayment()));
+            }
+        });
+
+        // Show the frame
+        frame.setVisible(true);
+    }
+}
+
+
+QN2.
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ */
+
+package asi.hello;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class StudentApp {
+
+    // Database connection details
+    private static final String URL = "jdbc:mysql://localhost:3306/Student2"; // Empty URL for creating a new database
+    private static final String USER = "root"; // Database username
+    private static final String PASSWORD = ""; // Database password
+
+    // Method to establish a connection to the database
+    public static Connection connect() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    // Method to create database and table
+    public static void createDatabaseAndTable() {
+        try (Connection conn = connect(); 
+             Statement stmt = conn.createStatement()) {
+
+            // Create Database
+            String createDatabaseSQL = "CREATE DATABASE IF NOT EXISTS Student2";
+            stmt.executeUpdate(createDatabaseSQL);
+
+            // Use the created database
+            String useDatabaseSQL = "USE Student2";
+            stmt.executeUpdate(useDatabaseSQL);
+
+            // Create Table
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS STUDENTINFORMATION (" +
+                    "reg_number INT PRIMARY KEY, " +
+                    "last_name VARCHAR(100), " +
+                    "first_name VARCHAR(100), " +
+                    "years_of_study INT, " +
+                    "telephone VARCHAR(15), " +
+                    "college VARCHAR(100), " +
+                    "email VARCHAR(100), " +
+                    "physics BOOLEAN, " +
+                    "mathematics BOOLEAN, " +
+                    "chemistry BOOLEAN, " +
+                    "biology BOOLEAN)";
+            stmt.executeUpdate(createTableSQL);
+
+            System.out.println("Database and table created successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error creating database or table: " + e.getMessage());
+        }
+    }
+
+    // Method to insert student data into the database
+    public void insertStudent(int regNumber, String lastName, String firstName, int yearsOfStudy,
+                              String telephone, String college, String email, boolean physics,
+                              boolean mathematics, boolean chemistry, boolean biology) {
+        String sql = "INSERT INTO STUDENTINFORMATION (reg_number, last_name, first_name, years_of_study, telephone, college, email, physics, mathematics, chemistry, biology) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, regNumber);
+            pstmt.setString(2, lastName);
+            pstmt.setString(3, firstName);
+            pstmt.setInt(4, yearsOfStudy);
+            pstmt.setString(5, telephone);
+            pstmt.setString(6, college);
+            pstmt.setString(7, email);
+            pstmt.setBoolean(8, physics);
+            pstmt.setBoolean(9, mathematics);
+            pstmt.setBoolean(10, chemistry);
+            pstmt.setBoolean(11, biology);
+            pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Data inserted successfully.");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error inserting data: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        // Create the database and table
+        createDatabaseAndTable();
+
+        JFrame frame = new JFrame("Student Information");
+        frame.setSize(600, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel panel = new JPanel();
+        frame.add(panel);
+        placeComponents(panel);
+
+        frame.setVisible(true);
+    }
+
+    private static void placeComponents(JPanel panel) {
+        panel.setLayout(null);
+        panel.setBackground(new Color(255, 250, 240)); // Floral White background
+
+        // Labels and text fields
+        Font labelFont = new Font("Arial", Font.BOLD, 14);
+        Font textFont = new Font("Arial", Font.PLAIN, 12);
+
+        JLabel regLabel = new JLabel("Reg Number:");
+        regLabel.setBounds(10, 20, 100, 25);
+        regLabel.setForeground(new Color(139, 0, 0)); // Dark Red label text color
+        regLabel.setFont(labelFont);
+        panel.add(regLabel);
+
+        JTextField regText = new JTextField(20);
+        regText.setBounds(120, 20, 165, 25);
+        regText.setFont(textFont);
+        regText.setBackground(new Color(224, 255, 255)); // Light Cyan background for text fields
+        panel.add(regText);
+
+        JLabel lastNameLabel = new JLabel("Last Name:");
+        lastNameLabel.setBounds(10, 50, 100, 25);
+        lastNameLabel.setForeground(new Color(139, 0, 0));
+        lastNameLabel.setFont(labelFont);
+        panel.add(lastNameLabel);
+
+        JTextField lastNameText = new JTextField(20);
+        lastNameText.setBounds(120, 50, 165, 25);
+        lastNameText.setFont(textFont);
+        lastNameText.setBackground(new Color(224, 255, 255));
+        panel.add(lastNameText);
+
+        JLabel firstNameLabel = new JLabel("First Name:");
+        firstNameLabel.setBounds(10, 80, 100, 25);
+        firstNameLabel.setForeground(new Color(139, 0, 0));
+        firstNameLabel.setFont(labelFont);
+        panel.add(firstNameLabel);
+
+        JTextField firstNameText = new JTextField(20);
+        firstNameText.setBounds(120, 80, 165, 25);
+        firstNameText.setFont(textFont);
+        firstNameText.setBackground(new Color(224, 255, 255));
+        panel.add(firstNameText);
+
+        JLabel yearsLabel = new JLabel("Years of Study:");
+        yearsLabel.setBounds(10, 110, 100, 25);
+        yearsLabel.setForeground(new Color(139, 0, 0));
+        yearsLabel.setFont(labelFont);
+        panel.add(yearsLabel);
+
+        JTextField yearsText = new JTextField(20);
+        yearsText.setBounds(120, 110, 165, 25);
+        yearsText.setFont(textFont);
+        yearsText.setBackground(new Color(224, 255, 255));
+        panel.add(yearsText);
+
+        JLabel phoneLabel = new JLabel("Telephone:");
+        phoneLabel.setBounds(10, 140, 100, 25);
+        phoneLabel.setForeground(new Color(139, 0, 0));
+        phoneLabel.setFont(labelFont);
+        panel.add(phoneLabel);
+
+        JTextField phoneText = new JTextField(20);
+        phoneText.setBounds(120, 140, 165, 25);
+        phoneText.setFont(textFont);
+        phoneText.setBackground(new Color(224, 255, 255));
+        panel.add(phoneText);
+
+        JLabel collegeLabel = new JLabel("College:");
+        collegeLabel.setBounds(10, 170, 100, 25);
+        collegeLabel.setForeground(new Color(139, 0, 0));
+        collegeLabel.setFont(labelFont);
+        panel.add(collegeLabel);
+
+        JTextField collegeText = new JTextField(20);
+        collegeText.setBounds(120, 170, 165, 25);
+        collegeText.setFont(textFont);
+        collegeText.setBackground(new Color(224, 255, 255));
+        panel.add(collegeText);
+
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setBounds(10, 200, 100, 25);
+        emailLabel.setForeground(new Color(139, 0, 0));
+        emailLabel.setFont(labelFont);
+        panel.add(emailLabel);
+
+        JTextField emailText = new JTextField(20);
+        emailText.setBounds(120, 200, 165, 25);
+        emailText.setFont(textFont);
+        emailText.setBackground(new Color(224, 255, 255));
+        panel.add(emailText);
+
+        // Modules checkboxes placed on the right side of the form
+        JLabel modulesLabel = new JLabel("Select Modules:");
+        modulesLabel.setBounds(320, 20, 120, 25);
+        modulesLabel.setForeground(new Color(139, 0, 0));
+        modulesLabel.setFont(labelFont);
+        panel.add(modulesLabel);
+
+        JCheckBox physicsCheckBox = new JCheckBox("Physics");
+        physicsCheckBox.setBounds(320, 50, 100, 25);
+        physicsCheckBox.setBackground(new Color(255, 250, 240)); // Floral White background for checkboxes
+        physicsCheckBox.setForeground(new Color(139, 0, 0));
+        panel.add(physicsCheckBox);
+
+        JCheckBox mathematicsCheckBox = new JCheckBox("Mathematics");
+        mathematicsCheckBox.setBounds(320, 80, 120, 25);
+        mathematicsCheckBox.setBackground(new Color(255, 250, 240));
+        mathematicsCheckBox.setForeground(new Color(139, 0, 0));
+        panel.add(mathematicsCheckBox);
+
+        JCheckBox chemistryCheckBox = new JCheckBox("Chemistry");
+        chemistryCheckBox.setBounds(320, 110, 100, 25);
+        chemistryCheckBox.setBackground(new Color(255, 250, 240));
+        chemistryCheckBox.setForeground(new Color(139, 0, 0));
+        panel.add(chemistryCheckBox);
+
+        JCheckBox biologyCheckBox = new JCheckBox("Biology");
+        biologyCheckBox.setBounds(320, 140, 100, 25);
+        biologyCheckBox.setBackground(new Color(255, 250, 240));
+        biologyCheckBox.setForeground(new Color(139, 0, 0));
+        panel.add(biologyCheckBox);
+
+        // Buttons (styled)
+        JButton submitButton = new JButton("Submit");
+        submitButton.setBounds(120, 230, 100, 40);
+        submitButton.setBackground(new Color(0, 100, 0)); // Dark Green background for button
+        submitButton.setForeground(Color.WHITE);
+        panel.add(submitButton);
+
+        JButton searchButton = new JButton("Search");
+        searchButton.setBounds(230, 230, 100, 40);
+        searchButton.setBackground(new Color(0, 100, 0)); // Dark Green background for button
+        searchButton.setForeground(Color.WHITE);
+        panel.add(searchButton);
+
+        // Action for Submit button
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int regNumber = Integer.parseInt(regText.getText());
+                String lastName = lastNameText.getText();
+                String firstName = firstNameText.getText();
+                int yearsOfStudy = Integer.parseInt(yearsText.getText());
+                String telephone = phoneText.getText();
+                String college = collegeText.getText();
+                String email = emailText.getText();
+                boolean physics = physicsCheckBox.isSelected();
+                boolean mathematics = mathematicsCheckBox.isSelected();
+                boolean chemistry = chemistryCheckBox.isSelected();
+                boolean biology = biologyCheckBox.isSelected();
+
+                new StudentApp().insertStudent(regNumber, lastName, firstName, yearsOfStudy, telephone, college, email,
+                        physics, mathematics, chemistry, biology);
+            }
+        });
+
+        // Action for Search button
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Search functionality coming soon!");
+            }
+        });
+    }
+}
